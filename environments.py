@@ -64,6 +64,10 @@ class GridWorld :
         # don't run off the right side of the world:
         if self.state >= self.width :
             self.state = self.width-1
+        
+        # don't run off the left side of the world:
+        if self.state < 0 :
+            self.state = 0
             
         return self.state, reward, done
     
