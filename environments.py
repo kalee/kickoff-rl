@@ -55,7 +55,6 @@ class GridWorldInertial :
     RIGHT = 2
     
     def __init__(self,width) :
-        self.width = width
         self.reset()
         
     def reset(self) :
@@ -68,8 +67,8 @@ class GridWorldInertial :
         self.state = {}
         
         # agent starts motionless at the far right:
-        self.state['position'] = self.width - 1
-        self.state['velocity'] = 0
+        self.state['position'] = None
+        self.state['velocity'] = None
         
         return self.state
     
@@ -83,37 +82,15 @@ class GridWorldInertial :
         '''
         
         # interpretation: previous velocity propagates first, then is updated.
-        self.state['position'] += self.state['velocity']
         
         
-        # don't run off the right side of the world:
-        if self.state['position'] >= self.width :
-            self.state['position'] = self.width-1
-            self.state['velocity'] = 0
+        # don't run off the right side of the world!
         
-        deltaV = action - 1 # shift to make this an actual signed number
-        self.state['velocity'] += deltaV
-        if self.state['velocity'] > 1 :
-            self.state['velocity'] = 1
-        if self.state['velocity'] < -1 :
-            self.state['velocity'] = -1
-        
+        # calculate rewards:
         reward = 0
-        # thrust penalties:
-        if action == self.LEFT :
-            reward -= 1
-        elif action == self.RIGHT :
-            reward -= 1
-        elif action == self.COAST :
-            pass
-        
-        if self.state['position'] <= 0 :
-            reward += 10
         
         # check termination:
         done = False
-        if self.state['position'] <= 0 :
-            done = True
             
         return self.state, reward, done
     
