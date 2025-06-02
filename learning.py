@@ -23,5 +23,5 @@ class QLearningGW :
         s is a state index;
         this method returns the column index corresponding to the largest element on row s of Q
         '''
-                
-        return int(np.argmax(Q[s]))
+        
+        return 0
