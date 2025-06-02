@@ -4,7 +4,12 @@ import numpy as np
 
 
 class QLearningGW :
-    def __init__(self,env, alpha=0.1, gamma=0.99, epsilon=0.1) :
+    '''
+    This is hard-coded for the GridWorld environment and will not work with the inertial version.
+    '''
+    
+    
+    def __init__(self,env, alpha=0.5, gamma=0.99, epsilon=0.1) :
         # assume env is a GridWorld object
         
         self.env = env
@@ -25,3 +30,61 @@ class QLearningGW :
         '''
                 
         return int(np.argmax(Q[s]))
+    
+    def randomAction(self) :
+        return int(np.random.randint(0,3))
+    
+    def select_action(self,s) :
+        '''
+        return an action index given state s. 
+        If epsilon-greedy, return a random action w.p. epsilon, otherwise a greedy action.
+        '''
+        if np.random.rand() < self.epsilon :
+            return self.randomAction()
+        else:
+            return self.greedyAction(self.q_table,s)
+    
+    def update_q(self,s,a) :
+        '''
+        perform an update of self.q_table based on the transition starting at
+        state s and applying action a.
+        returns new state index s and done bit.
+        '''
+        
+        self.env.state = s
+        sprime,reward,done = self.env.step(a)
+        
+        oldPart = (1-self.alpha)*self.q_table[s,a]
+        aprime = self.greedyAction(self.q_table,sprime)
+        
+        if done :
+            updatePart = self.alpha*reward
+        else :
+            updatePart = self.alpha*(reward + self.q_table[sprime,aprime])
+        
+        self.q_table[s,a] = oldPart + updatePart
+        
+        return sprime, done
+    
+    def learn(self, episodes=5000, max_steps=100):
+        '''
+        initialize the environment up to episodes times, run each training episode up to max_steps timesteps.
+        Each timestep, get an action using the self.select_action method and perform an update on the q-table.
+        If the self.update_q method returns done=True, start a new training episode.
+        '''
+        for ep in range(episodes):
+            state = self.env.reset()
+            for _ in range(max_steps):
+                action = self.select_action(state)
+                sprime, done = self.update_q(state,action)
+                state = sprime
+                if done:
+                    break
+    
+    
+if __name__ == "__main__" :
+    from environments import GridWorld
+    
+    gw = GridWorld(20)
+    
+    agent = QLearningGW(gw,alpha=.5)
