@@ -8,6 +8,8 @@ Created on Mon Jun  2 15:15:50 2025
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 
 
@@ -66,6 +68,41 @@ class GridWorld :
         return self.state, reward, done
     
     
+    def render(self, mode='rgb_array'):
+        assert mode == 'rgb_array', "Only 'rgb_array' mode is supported"
+        
+        # Create a figure and axis
+        fig, ax = plt.subplots(figsize=(self.width, 1))
+        canvas = FigureCanvas(fig)
+    
+        ax.set_xlim(0, self.width)
+        ax.set_ylim(0, 1)
+        ax.axis('off')
+    
+        position = self.state
+    
+        # Draw background grid
+        for i in range(self.width):
+            rect = patches.Rectangle((i, 0), 1, 1, linewidth=1, edgecolor='gray', facecolor='white')
+            ax.add_patch(rect)
+    
+        # Draw target at far left
+        ax.add_patch(patches.Rectangle((0, 0), 1, 1, color='red', alpha=0.3))
+    
+        # Draw agent
+        ax.add_patch(patches.Rectangle((position, 0), 1, 1, color='blue'))
+    
+    
+        
+        # Render to RGB array
+        canvas.draw()
+        buf = canvas.buffer_rgba()  # use RGBA buffer
+        width, height = fig.get_size_inches() * fig.dpi
+        image = np.frombuffer(buf, dtype=np.uint8).reshape(int(height), int(width), 4)[..., :3]  # strip alpha
+        
+        plt.close(fig)
+    
+        return image
     
 
 
@@ -139,6 +176,55 @@ class GridWorldInertial :
             done = True
             
         return self.state, reward, done
+    
+    def render(self, mode='rgb_array'):
+        assert mode == 'rgb_array', "Only 'rgb_array' mode is supported"
+        
+        # Create a figure and axis
+        fig, ax = plt.subplots(figsize=(self.width, 1))
+        canvas = FigureCanvas(fig)
+    
+        ax.set_xlim(0, self.width)
+        ax.set_ylim(0, 1)
+        ax.axis('off')
+    
+        position = self.state['position']
+        velocity = self.state['velocity']
+    
+        # Draw background grid
+        for i in range(self.width):
+            rect = patches.Rectangle((i, 0), 1, 1, linewidth=1, edgecolor='gray', facecolor='white')
+            ax.add_patch(rect)
+    
+        # Draw target at far left
+        ax.add_patch(patches.Rectangle((0, 0), 1, 1, color='red', alpha=0.3))
+    
+        # Draw agent
+        ax.add_patch(patches.Rectangle((position, 0), 1, 1, color='blue'))
+    
+        # Draw velocity arrow (rightward or leftward)
+        if velocity != 0:
+            direction = np.sign(velocity)
+            arrow_length = min(abs(velocity), self.width - 1)
+            arrow_x = position + 0.5
+            arrow_dx = direction * arrow_length
+            ax.arrow(
+                arrow_x, 0.5,  # Start at center of agent cell
+                dx=arrow_dx, dy=0,
+                width=0.05, head_width=0.3, head_length=0.3,
+                length_includes_head=True, color='black'
+            )
+    
+        
+        # Render to RGB array
+        canvas.draw()
+        buf = canvas.buffer_rgba()  # use RGBA buffer
+        width, height = fig.get_size_inches() * fig.dpi
+        image = np.frombuffer(buf, dtype=np.uint8).reshape(int(height), int(width), 4)[..., :3]  # strip alpha
+        
+        plt.close(fig)
+    
+        return image
     
     
 if __name__ == '__main__' :
