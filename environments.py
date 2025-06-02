@@ -18,17 +18,14 @@ class GridWorld :
     RIGHT = 2
     
     def __init__(self,width) :
-        self.width = width
+        
         self.reset()
         
     def reset(self) :
         '''
         This method sets self.state to the initial state and then return the current state
         '''
-        
-        # initialize
-        self.state = self.width - 1
-        
+        self.state = None ## edit this line of code!
         return self.state
     
     def step(self,action) :
@@ -41,27 +38,7 @@ class GridWorld :
         '''
         
         reward = 0
-        # action penalties:
-        if action == self.LEFT :
-            self.state -= 1
-            reward -= 1
-        elif action == self.RIGHT :
-            self.state += 1
-            reward -= 1
-        elif action == self.COAST :
-            pass
-        
-        if self.state <= 0 :
-            reward += 10
-        
-        # check termination:
         done = False
-        if self.state <= 0 :
-            done = True
-        
-        # don't run off the right side of the world:
-        if self.state >= self.width :
-            self.state = self.width-1
             
         return self.state, reward, done
     
