@@ -112,8 +112,23 @@ class QLearningGW :
                 s = sprime
                 if done:
                     break
+
+
+        """
+        sprime, reward, done, _, _ = self.env.step(self.env.LEFT) 
+        print(self.env.state)
+        self.q_table[s, self.env.LEFT] = reward
         
-    
+        sprime, reward, done, _, _ = self.env.step(self.env.COAST)
+        self.q_table[s, self.env.COAST] = reward
+        print(self.env.state)
+        
+        # Can't just run this one, changes state/row.
+        sprime, reward, done, _, _ = self.env.step(self.env.RIGHT)
+        self.q_table[s, self.env.RIGHT] = reward
+        print(self.env.state)
+        """
+
 # q_table = np.zeros((num_states, num_actions))    
 if __name__ == "__main__" :
     from environments import GridWorld
@@ -122,10 +137,20 @@ if __name__ == "__main__" :
     # Alpha [0,1] Higher value, accept new value
     # Gamma [0,1] percentage of reward received 
     # Epsilon [0,1] Percent random vs greedy
+    
+
+    # Print the current state in gw
+    print("state=",gw.state)
+    
     agent = QLearningGW(gw, alpha=1, gamma=1, epsilon=0.1)
     
     #agent.learn(episodes=5000)
-    agent.learn(episodes=50, max_steps=50)
+    agent.learn(episodes=500, max_steps=500)
+
+    for i in range(3):
+        agent.q_table[agent.env.state,i] = agent.q_table[agent.env.state+1,i] + 1
+
+
     
     print(agent.q_table)
 
@@ -164,3 +189,41 @@ What needs to be updated to get the first line to be
 9 10 8 ?
 
 """
+
+"""
+
+In [63]: %runfile /Users/klee/srccode/uccs.edu/kickoff-rl/learning.py --wdir
+Reloaded modules: environments
+state= 4
+[[0. 0. 0.]
+ [9. 9. 7.]
+ [8. 0. 6.]
+ [7. 7. 5.]
+ [6. 6. 5.]]
+
+In [64]: agent.update_q(0,0)
+Out[64]: (0, True)
+
+In [65]: print(agent.q_table)
+[[9. 0. 0.]
+ [9. 9. 7.]
+ [8. 0. 6.]
+ [7. 7. 5.]
+ [6. 6. 5.]]
+
+In [66]: agent.update_q(0,1)
+Out[66]: (0, True)
+
+In [67]: print(agent.q_table)
+[[ 9. 19.  0.]
+ [ 9.  9.  7.]
+ [ 8.  0.  6.]
+ [ 7.  7.  5.]
+ [ 6.  6.  5.]]
+
+In [68]: 
+
+Why doesn't agent.update_q(0,1) put 10 in the q_table?
+
+"""
+
